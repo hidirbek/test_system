@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TLS Test System</title>
+    <link rel="stylesheet" href="./css/style.css" />
+    <link rel="shortcut icon" href="./img/favicon.ico" type="image/x-icon" />
+  </head>
+  <body>
+    <header class="main_header">
+      <div class="header_logo-wrapper">
+        <img src=".//img/TLS.png" alt="" />
+      </div>
+      <div class="user_info">
+        <div class="user_img"></div>
+        <p class="username">Name <br />surname</p>
+      </div>
+    </header>
+    <main class="site_main">
+      <h1 class="main_title">Выберите предмет:</h1>
+      <div id="subjects" class="subject_btn-wrapper">
+        <button class="subject_btn">Информатика</button>
+        <button class="subject_btn" data-subject="english">
+          Английский язык
+        </button>
+        <button class="subject_btn" data-subject="math">Математика</button>
+        <button class="subject_btn">Русский язык</button>
+      </div>
+      <h2 id="tests-title"></h2>
+      <ul id="tests-list"></ul>
+
+      <div id="test-container"></div>
+    </main>
+  </body>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const subjectButtons = document.querySelectorAll(".subject_btn");
+      const testsList = document.getElementById("tests-list");
+      const testsTitle = document.getElementById("tests-title");
+      const testContainer = document.getElementById("test-container");
+
+      subjectButtons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const subject = btn.dataset.subject;
+          loadTests(subject);
+        });
+      });
+
+      function loadTests(subject) {
+        fetch("./data/test.json")
+          .then((res) => res.json())
+          .then((data) => {
+            const tests = data[subject];
+
+            testsTitle.textContent = `Тесты по предмету: ${subject}`;
+            testsList.innerHTML = "";
+            testContainer.innerHTML = "";
+
+            tests.forEach((test) => {
+              const li = document.createElement("li");
+              li.textContent = test.title;
+
+              li.addEventListener("click", () => {
+                showTest(test);
+              });
+
+              testsList.appendChild(li);
+            });
+          });
+      }
+
+      function showTest(test) {
+        testsList.innerHTML = "";
+        testsTitle.textContent = test.title;
+        testContainer.innerHTML = "";
+
+        test.questions.forEach((q, index) => {
+          const qBlock = document.createElement("div");
+          qBlock.className = "question-block";
+
+          qBlock.innerHTML = `
+                <h3>${index + 1}. ${q.question}</h3>
+                <div class="options">
+                    ${q.options
+                      .map(
+                        (opt, i) => `
+                        <label>
+                            <input type="radio" name="q${index}" value="${i}">
+                            ${opt}
+                        </label>
+                    `,
+                      )
+                      .join("")}
+                </div>
+            `;
+
+          testContainer.appendChild(qBlock);
+        });
+
+        const finishBtn = document.createElement("button");
+        finishBtn.id = "finish-btn";
+        finishBtn.textContent = "Завершить тест";
+
+        finishBtn.addEventListener("click", () => checkAnswers(test));
+
+        testContainer.appendChild(finishBtn);
+      }
+
+      function checkAnswers(test) {
+        let correct = 0;
+
+        test.questions.forEach((q, index) => {
+          const selected = document.querySelector(
+            `input[name="q${index}"]:checked`,
+          );
+          if (selected && Number(selected.value) === q.answer) {
+            correct++;
+          }
+        });
+
+        const result = document.createElement("div");
+        result.id = "result";
+        result.textContent = `Ваш результат: ${correct} из ${test.questions.length}`;
+
+        testContainer.appendChild(result);
+      }
+    });
+  </script>
+</html>
