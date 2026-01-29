@@ -8,13 +8,50 @@
   </head>
   <body class="site_body">
     <div class="main_div">
-      <img src="../img/logo.png" alt="" width="200" />
-      <h1 class="login_title">TLS Test System</h1>
+      <img src="../img/logo.png" alt="" width="150" />
+      <h1 class="login_title">Login</h1>
+
       <div class="input_wrapper">
-        <input placeholder="Username" type="text" />
-        <input type="password" name="" id="" placeholder="Password" />
+        <input id="username" placeholder="Username" type="text" />
+        <input id="password" placeholder="Password" type="password" />
       </div>
-      <button class="submit_btn">Login</button>
+
+      <button class="submit_btn" id="loginBtn">Login</button>
+      <p id="msg"></p>
     </div>
+
+    <script>
+      // USERS STORED IN CODE (demo only)
+      const users = [
+        { username: "admin", password: "1234" },
+        { username: "student", password: "school" },
+      ];
+
+      const loginBtn = document.getElementById("loginBtn");
+      const msg = document.getElementById("msg");
+
+      loginBtn.addEventListener("click", () => {
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value;
+
+        const validUser = users.find(
+          (u) => u.username === username && u.password === password,
+        );
+
+        if (validUser) {
+          msg.textContent = "Login successful!";
+          msg.style.color = "green";
+
+          // save login (optional)
+          localStorage.setItem("loggedInUser", username);
+
+          // redirect (change if needed)
+          window.location.href = "/index.html";
+        } else {
+          msg.textContent = "Invalid username or password";
+          msg.style.color = "red";
+        }
+      });
+    </script>
   </body>
 </html>
